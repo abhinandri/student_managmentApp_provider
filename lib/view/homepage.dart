@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+
 import 'package:provider_student_app/controller/add_student_controller.dart';
 import 'package:provider_student_app/view/add_student.dart';
 import 'package:provider_student_app/view/custome_text.dart';
@@ -7,18 +8,19 @@ import 'package:provider_student_app/view/grideview.dart';
 import 'package:provider_student_app/view/listview.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
+
+  final StudentController studentController = Get.find<StudentController>();
+  final TextEditingController searchController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController searchController = TextEditingController();
-
     return DefaultTabController(
       length: 2, // Number of tabs
       child: Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.purple,
           title: const CustomText(text: "Student Details"),
         ),
         body: Padding(
@@ -29,8 +31,7 @@ class HomePage extends StatelessWidget {
               TextField(
                 controller: searchController,
                 onChanged: (query) {
-                  Provider.of<StudentProvider>(context, listen: false)
-                      .searchStudent(query);
+                  studentController.searchStudent(query);
                 },
                 decoration: InputDecoration(
                   hintText: 'Search...',
@@ -40,7 +41,7 @@ class HomePage extends StatelessWidget {
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue, width: 1),
+                    borderSide: BorderSide(color: Colors.purple, width: 1),
                   ),
                 ),
               ),
@@ -48,8 +49,8 @@ class HomePage extends StatelessWidget {
 
               // TabBar Below Search Bar
               const TabBar(
-                labelColor: Colors.blue,
-                indicatorColor: Colors.blue,
+                labelColor: Colors.purple,
+                indicatorColor: Colors.purple,
                 tabs: [
                   Tab(icon: Icon(Icons.list), text: "List View"),
                   Tab(icon: Icon(Icons.grid_view), text: "Gride View"),
@@ -59,7 +60,7 @@ class HomePage extends StatelessWidget {
               const SizedBox(height: 10),
 
               // TabBarView
-              const Expanded(
+              Expanded(
                 child: TabBarView(
                   children: [
                     StudentListView(), // First tab content
@@ -72,10 +73,9 @@ class HomePage extends StatelessWidget {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(context,
-                MaterialPageRoute(builder: ((context) => AddStudent())));
+            Get.to(() => AddStudent());
           },
-          backgroundColor: Colors.blue,
+          backgroundColor: Colors.purple,
           child: Icon(
             Icons.add,
             color: Colors.white,

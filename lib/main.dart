@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:get/get.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:hive_flutter/adapters.dart';
-import 'package:provider/provider.dart';
+
 import 'package:provider_student_app/controller/add_student_controller.dart';
-import 'package:provider_student_app/controller/splash_controller.dart';
 import 'package:provider_student_app/model/student_model.dart';
 import 'package:provider_student_app/view/splash.dart';
 
@@ -15,13 +15,8 @@ Future<void> main() async {
   Hive.registerAdapter(StudentModelAdapter());
 
   await Hive.openBox<StudentModel>('student');
-
-  runApp(
-    MultiProvider(providers: [
-      // ChangeNotifierProvider(create: (context) => SplashController()),
-      ChangeNotifierProvider(create: (context) => StudentProvider())
-    ], child: const MyApp()),
-  );
+  Get.put(StudentController());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -29,9 +24,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       home: Splash(),
+      initialBinding: BindingsBuilder(() {
+        Get.put(StudentController());
+      }),
     );
   }
 }

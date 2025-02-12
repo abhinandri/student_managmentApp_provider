@@ -1,8 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:provider_student_app/controller/add_student_controller.dart';
+
 import 'package:provider_student_app/model/student_model.dart';
 import 'package:provider_student_app/view/custome_text.dart';
 
@@ -10,21 +12,31 @@ class EditPage extends StatelessWidget {
   final int index;
   final StudentModel student;
 
-  const EditPage({super.key, required this.index, required this.student});
+  EditPage({super.key, required this.index, required this.student});
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController ageController = TextEditingController();
+  final TextEditingController numberController = TextEditingController();
+  final Rx<File?> imageFile = Rx<File?>(null);
 
   @override
   Widget build(BuildContext context) {
-    final studentProvider =
-        Provider.of<StudentProvider>(context, listen: false);
+    final StudentController studentController = Get.find<StudentController>();
 
-    TextEditingController nameController =
-        TextEditingController(text: student.name);
-    TextEditingController ageController =
-        TextEditingController(text: student.age);
-    TextEditingController numberController =
-        TextEditingController(text: student.phoneNumber);
-    File? imageFile =
+    nameController.text = student.name;
+    ageController.text = student.age;
+    numberController.text = student.phoneNumber;
+    imageFile.value =
         student.imagePath != null ? File(student.imagePath!) : null;
+
+    // TextEditingController nameController =
+    //     TextEditingController(text: student.name);
+    // TextEditingController ageController =
+    //     TextEditingController(text: student.age);
+    // TextEditingController numberController =
+    //     TextEditingController(text: student.phoneNumber);
+    // File? imageFile =
+    //     student.imagePath != null ? File(student.imagePath!) : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -42,22 +54,24 @@ class EditPage extends StatelessWidget {
           child: Column(
             children: [
               GestureDetector(
-                onTap: () async {
-                  final pickedFile = await ImagePicker()
-                      .pickImage(source: ImageSource.gallery);
-                  if (pickedFile != null) {
-                    imageFile = File(pickedFile.path);
-                  }
-                },
-                child: CircleAvatar(
-                  radius: 80,
-                  backgroundImage:
-                      imageFile != null ? FileImage(imageFile!) : null,
-                  child: imageFile == null
-                      ? const Icon(Icons.person, size: 50)
-                      : null,
-                ),
-              ),
+                  onTap: () async {
+                    final pickedFile = await ImagePicker()
+                        .pickImage(source: ImageSource.gallery);
+                    if (pickedFile != null) {
+                      imageFile.value = File(pickedFile.path);
+                    }
+                  },
+                  child: Obx(
+                    () => CircleAvatar(
+                      radius: 80,
+                      backgroundImage: imageFile != null
+                          ? FileImage(imageFile.value!)
+                          : null,
+                      child: imageFile == null
+                          ? const Icon(Icons.person, size: 50)
+                          : null,
+                    ),
+                  )),
               const SizedBox(height: 15),
               TextFormField(
                 controller: nameController,
@@ -96,10 +110,10 @@ class EditPage extends StatelessWidget {
                     name: nameController.text.trim(),
                     age: ageController.text.trim(),
                     phoneNumber: numberController.text.trim(),
-                    imagePath: imageFile?.path,
+                    imagePath: imageFile.value?.path,
                   );
-                  studentProvider.updateStudent(index, updatedStudent);
-                  Navigator.pop(context);
+                  studentController.updateStudent(index, updatedStudent);
+                  Get.back();
                 },
                 child: const Text(
                   "Save Changes",

@@ -1,50 +1,60 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:provider_student_app/hive/add_student_db.dart';
 import 'package:provider_student_app/model/student_model.dart';
 
-class StudentProvider extends ChangeNotifier {
+class StudentController extends GetxController {
   final formKey = GlobalKey<FormState>();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController numberController = TextEditingController();
-  File? _image;
 
-  File? get image => _image;
+  // Observable variables
+  Rx<File?> image = Rx<File?>(null);
+  RxList<StudentModel> students = <StudentModel>[].obs;
+  RxList<StudentModel> filteredStudents = <StudentModel>[].obs;
 
-  List<StudentModel> _students = [];
-  List<StudentModel> _filteredStudents = [];
-
-  List<StudentModel> get students =>
-      _filteredStudents.isEmpty ? _students : _filteredStudents;
-
-  StudentProvider() {
+  @override
+  onInit() {
+    super.onInit();
     loadStudent();
   }
+  // File? _image;
+
+  // File? get image => _image;
+
+  // List<StudentModel> _students = [];
+  // List<StudentModel> _filteredStudents = [];
+
+  // List<StudentModel> get students =>
+  //     _filteredStudents.isEmpty ? _students : _filteredStudents;
+
+  // StudentProvider() {
+  //   loadStudent();
+  // }
+
   Future<void> loadStudent() async {
-    _students = await StudentDB().getAllStudents();
-    notifyListeners();
+    final studentList = await StudentDB().getAllStudents();
+    students.assignAll(studentList);
   }
 
   void updateStudent(int index, StudentModel updateStudent) {
-    _students[index] = updateStudent;
-    notifyListeners();
+    students[index] = updateStudent;
+    students.refresh();
   }
 
   /////search Function//
   void searchStudent(String query) {
     if (query.isEmpty) {
-      _filteredStudents = [];
+      filteredStudents.clear();
     } else {
-      _filteredStudents = _students
-          .where((student) =>
-              student.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+      filteredStudents.assignAll(students.where((student) =>
+          student.name.toLowerCase().contains(query.toLowerCase())));
     }
-    notifyListeners();
   }
 
   // Function to delete a student
@@ -59,45 +69,48 @@ class StudentProvider extends ChangeNotifier {
         await ImagePicker().pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      _image = File(pickedFile.path);
-      notifyListeners();
+      image.value = File(pickedFile.path);
     }
   }
 
   // Function to submit form
-  void submitForm(BuildContext context, ) async {
+  void submitForm(
+    BuildContext context,
+  ) async {
     if (formKey.currentState!.validate()) {
       final student = StudentModel(
           name: nameController.text.trim(),
           age: ageController.text.trim(),
           phoneNumber: numberController.text.trim(),
-          imagePath: _image?.path);
+          imagePath: image.value?.path);
 
       await StudentDB().addStudent(student);
       await loadStudent();
+      Get.back();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Student details added successfully!'),
+      Get.snackbar('Success', 'Student details added successfully',
           backgroundColor: Colors.green,
-        ),
-      );
+          colorText: Colors.white,
+          snackPosition: SnackPosition.BOTTOM);
+
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(
+      //     content: Text('Student details added successfully!'),
+      //     backgroundColor: Colors.green,
+      //   ),
+      // );
       nameController.clear();
       ageController.clear();
       numberController.clear();
-      _image = null;
-
-      notifyListeners();
-
-      Navigator.pop(context);
+      image.value = null;
     }
   }
 
   @override
-  void dispose() {
+  void onClose() {
     nameController.dispose();
     ageController.dispose();
     numberController.dispose();
-    super.dispose();
+    super.onClose();
   }
 }

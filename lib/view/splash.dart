@@ -31,13 +31,13 @@ class Splash extends StatelessWidget {
       if (ModalRoute.of(context)?.isCurrent ?? false) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => HomePage()),
         );
       }
     });
 
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: Colors.purple,
       body: TweenAnimationBuilder<double>(
         tween: Tween(begin: 0.0, end: 1.0),
         duration: const Duration(milliseconds: 1500),
