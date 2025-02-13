@@ -1,22 +1,4 @@
-// import 'package:flutter/material.dart';
-// import 'package:provider_student_app/view/homepage.dart';
 
-// class Splash extends StatelessWidget {
-//   const Splash({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     Future.delayed(const Duration(seconds: 3), () {
-//       Navigator.pushReplacement(
-//           context, MaterialPageRoute(builder: (ctx) => const HomePage()));
-//     });
-//     return const Scaffold(
-//       body: Center(
-//         child: Text('welcome'),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 
 import 'package:provider_student_app/view/homepage.dart';
